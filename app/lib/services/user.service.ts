@@ -10,7 +10,8 @@ import type {
   CountriesQueryParams,
 } from "../auth/types";
 
-const API_BASE_URL = 'https://elathiness-backend-app-company-idea-production.up.railway.app';
+const API_BASE_URL =
+  "https://elathiness-backend-app-company-idea-production.up.railway.app";
 
 // JWT payload interface for decoding tokens
 interface JWTPayload {
@@ -102,8 +103,9 @@ export async function authenticateUser(
     // Create user object from JWT payload
     const user: User = {
       _id: userPayload.sub,
-      firstName: userPayload.name?.split(' ')[0] || userPayload.email.split("@")[0],
-      lastName: userPayload.name?.split(' ')[1] || '',
+      firstName:
+        userPayload.name?.split(" ")[0] || userPayload.email.split("@")[0],
+      lastName: userPayload.name?.split(" ")[1] || "",
       username: userPayload.email.split("@")[0],
       email: [userPayload.email],
       roles: [userPayload.role],
@@ -121,13 +123,13 @@ export async function authenticateUser(
         dailyMood: false,
         drinkWater: false,
         quotes: { send: false, minutes: 0 },
-        facts: { send: false, minutes: 0 }
+        facts: { send: false, minutes: 0 },
       },
       accomplishments: [],
       rating: 0,
       reviews: 0,
       price: 0,
-      currency: 'usd',
+      currency: "usd",
       coaches: [],
       coachTrainees: [],
       coachGroup: [],
@@ -209,8 +211,8 @@ export function getUserFromToken(accessToken: string): User | null {
 
   return {
     _id: payload.sub,
-    firstName: payload.name?.split(' ')[0] || payload.email.split("@")[0],
-    lastName: payload.name?.split(' ')[1] || '',
+    firstName: payload.name?.split(" ")[0] || payload.email.split("@")[0],
+    lastName: payload.name?.split(" ")[1] || "",
     username: payload.email.split("@")[0],
     email: [payload.email],
     roles: [payload.role],
@@ -228,13 +230,13 @@ export function getUserFromToken(accessToken: string): User | null {
       dailyMood: false,
       drinkWater: false,
       quotes: { send: false, minutes: 0 },
-      facts: { send: false, minutes: 0 }
+      facts: { send: false, minutes: 0 },
     },
     accomplishments: [],
     rating: 0,
     reviews: 0,
     price: 0,
-    currency: 'usd',
+    currency: "usd",
     coaches: [],
     coachTrainees: [],
     coachGroup: [],
@@ -261,27 +263,28 @@ export function buildUsersQueryString(params: UsersQueryParams = {}): string {
 
   // Add parameters only if they have values
   if (params.page !== undefined) {
-    searchParams.append('page', params.page.toString());
+    searchParams.append("page", params.page.toString());
   }
-  
+
   if (params.limit !== undefined) {
-    searchParams.append('limit', params.limit.toString());
+    searchParams.append("limit", params.limit.toString());
   }
-  
+
   if (params.search && params.search.trim()) {
-    searchParams.append('search', params.search.trim());
+    searchParams.append("search", params.search.trim());
   }
-  
+
   if (params.orderBy) {
-    searchParams.append('orderBy', params.orderBy);
+    searchParams.append("orderBy", params.orderBy);
   }
-  
+
   if (params.type) {
-    searchParams.append('type', params.type);
+    searchParams.append("type", params.type);
   }
 
   const queryString = searchParams.toString();
-  return `/v1/admin/users${queryString ? `?${queryString}` : ''}`;
+
+  return `/v1/admin/users${queryString ? `?${queryString}` : ""}`;
 }
 
 /**
@@ -294,92 +297,112 @@ export function buildUserDetailsEndpoint(userId: string): string {
 /**
  * Builds the query string for regions endpoint
  */
-export function buildRegionsQueryString(params: RegionsQueryParams = {}): string {
+export function buildRegionsQueryString(
+  params: RegionsQueryParams = {},
+): string {
   const searchParams = new URLSearchParams();
 
   // Add parameters only if they have values
   if (params.page !== undefined) {
-    searchParams.append('page', params.page.toString());
+    searchParams.append("page", params.page.toString());
   }
-  
+
   if (params.limit !== undefined) {
-    searchParams.append('limit', params.limit.toString());
+    searchParams.append("limit", params.limit.toString());
   }
-  
+
   if (params.search && params.search.trim()) {
-    searchParams.append('search', params.search.trim());
+    searchParams.append("search", params.search.trim());
   }
-  
+
   if (params.orderBy) {
-    searchParams.append('orderBy', params.orderBy);
+    searchParams.append("orderBy", params.orderBy);
   }
-  
+
   if (params.type) {
-    searchParams.append('type', params.type);
+    searchParams.append("type", params.type);
   }
 
   const queryString = searchParams.toString();
-  return `/v1/admin/region${queryString ? `?${queryString}` : ''}`;
+  return `/v1/admin/region${queryString ? `?${queryString}` : ""}`;
 }
 
 /**
  * Builds the query string for companies endpoint
  */
-export function buildCompaniesQueryString(params: CompaniesQueryParams = {}): string {
+export function buildCompaniesQueryString(
+  params: CompaniesQueryParams = {},
+): string {
   const searchParams = new URLSearchParams();
 
   // Add parameters only if they have values
   if (params.page !== undefined) {
-    searchParams.append('page', params.page.toString());
+    searchParams.append("page", params.page.toString());
   }
-  
+
   if (params.limit !== undefined) {
-    searchParams.append('limit', params.limit.toString());
+    searchParams.append("limit", params.limit.toString());
   }
-  
+
   if (params.search && params.search.trim()) {
-    searchParams.append('search', params.search.trim());
+    searchParams.append("search", params.search.trim());
   }
-  
+
   if (params.orderBy) {
-    searchParams.append('orderBy', params.orderBy);
+    searchParams.append("orderBy", params.orderBy);
   }
-  
+
   if (params.type) {
-    searchParams.append('type', params.type);
+    searchParams.append("type", params.type);
   }
 
   const queryString = searchParams.toString();
-  return `/v1/admin/company${queryString ? `?${queryString}` : ''}`;
+  return `/v1/admin/company${queryString ? `?${queryString}` : ""}`;
 }
 
 /**
  * Builds the query string for countries endpoint
  */
-export function buildCountriesQueryString(params: CountriesQueryParams = {}): string {
+export function buildCountriesQueryString(
+  params: CountriesQueryParams = {},
+): string {
   const searchParams = new URLSearchParams();
 
   // Add parameters only if they have values
   if (params.page !== undefined) {
-    searchParams.append('page', params.page.toString());
+    searchParams.append("page", params.page.toString());
   }
-  
+
   if (params.limit !== undefined) {
-    searchParams.append('limit', params.limit.toString());
+    searchParams.append("limit", params.limit.toString());
   }
-  
+
   if (params.search && params.search.trim()) {
-    searchParams.append('search', params.search.trim());
+    searchParams.append("search", params.search.trim());
   }
-  
+
   if (params.orderBy) {
-    searchParams.append('orderBy', params.orderBy);
+    searchParams.append("orderBy", params.orderBy);
   }
-  
+
   if (params.type) {
-    searchParams.append('type', params.type);
+    searchParams.append("type", params.type);
   }
 
   const queryString = searchParams.toString();
-  return `/v1/admin/country${queryString ? `?${queryString}` : ''}`;
+  return `/v1/admin/country${queryString ? `?${queryString}` : ""}`;
+}
+
+/**
+ * Builds the endpoint for getting country details by ID
+ */
+export function buildCountryDetailsEndpoint(countryId: string): string {
+  return `/v1/country/${countryId}`;
+}
+
+/**
+ * Builds the endpoint for getting region details by ID
+ */
+export function buildRegionDetailsEndpoint(regionId: string): string {
+  return `/v1/region/${regionId}`;
 }

@@ -90,6 +90,7 @@ export default function CustomersPage() {
     search: debouncedSearchTerm || undefined,
     orderBy: orderBy,
     type: sortType,
+    userRole: user?.role, // Pass user role to filter appropriately
   });
 
   const handleRefresh = () => {

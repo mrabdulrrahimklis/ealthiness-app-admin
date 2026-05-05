@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import type { Route } from "./+types/regions";
-import { Globe, Plus, Mail, Search, ChevronDown, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Globe,
+  Plus,
+  Mail,
+  Search,
+  ChevronDown,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Eye,
+} from "lucide-react";
 import { Button, Card, Badge, Input } from "~/components/ui";
 import AppSidebar from "../../src/components/shared/AppSidebar";
 import Navbar from "../../src/components/shared/Navbar";
@@ -28,10 +39,12 @@ export default function RegionsPage() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [orderBy, setOrderBy] = useState<"name" | "createdAt">("name");
-  const [sortType, setSortType] = useState<"ascending" | "descending">("ascending");
+  const [sortType, setSortType] = useState<"ascending" | "descending">(
+    "ascending",
+  );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: string;
@@ -111,6 +124,7 @@ export default function RegionsPage() {
     name: apiRegion.name,
     code: apiRegion.name.substring(0, 3).toUpperCase(), // Generate code from name
     adminCount: apiRegion.adminCount,
+    image: apiRegion.image?.url || null, // Extract URL from image object
     createdAt: new Date(apiRegion.createdAt).toLocaleDateString(),
   });
 
@@ -129,12 +143,10 @@ export default function RegionsPage() {
     });
   };
 
-  const handleAddRegion = () => {
-    setModalState({ isOpen: true, type: "region", data: null });
-  };
-
   return (
-    <RoleGuard allowedRoles={["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"]}>
+    <RoleGuard
+      allowedRoles={["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN"]}
+    >
       <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
         <AppSidebar user={user} />
 
@@ -161,9 +173,6 @@ export default function RegionsPage() {
                     {visibleRegions.length} on this page)
                   </p>
                 </div>
-                <Button onClick={handleAddRegion}>
-                  <Plus size={18} className="mr-2" /> Add Region
-                </Button>
               </div>
 
               {/* Search and Filters */}
@@ -290,10 +299,23 @@ export default function RegionsPage() {
                           className="hover:bg-gray-50 transition"
                         >
                           <td className="p-4 font-bold text-[#1B173A] flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#E8E6FC] text-[#5850DE] flex items-center justify-center">
-                              <Globe size={16} />
+                            <div className="w-8 h-8 rounded-lg bg-[#E8E6FC] text-[#5850DE] flex items-center justify-center overflow-hidden">
+                              {region.image ? (
+                                <img
+                                  src={region.image}
+                                  alt={`${region.name} region`}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                              ) : (
+                                <Globe size={16} />
+                              )}
                             </div>
-                            {region.name}
+                            <Link
+                              to={`/regions/${region.id}`}
+                              className="hover:text-[#5850DE] transition-colors font-bold"
+                            >
+                              {region.name}
+                            </Link>
                           </td>
                           <td className="p-4 font-mono text-[#60646C] text-sm">
                             {region.code}
@@ -313,6 +335,19 @@ export default function RegionsPage() {
                           </td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end gap-2">
+                              {user?.role === "SUPER_ADMIN" ? (
+                                <Link to={`/regions/${region.id}`}>
+                                  <Button variant="outline" size="sm">
+                                    <Edit size={16} className="mr-2" /> Edit
+                                  </Button>
+                                </Link>
+                              ) : (
+                                <Link to={`/regions/${region.id}`}>
+                                  <Button variant="outline" size="sm">
+                                    <Eye size={16} className="mr-2" /> View
+                                  </Button>
+                                </Link>
+                              )}
                               <Button
                                 variant="outline"
                                 onClick={() => handleInviteAdmin(region.name)}
@@ -462,15 +497,13 @@ export default function RegionsPage() {
                 </div>
               )}
 
-              {/* Modal for invite/add actions */}
+              {/* Modal for invite admin */}
               {modalState.isOpen && (
                 <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
                   <Card className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
                     <div className="p-6 border-b border-[#E0E1E6] flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-[#1B173A]">
-                        {modalState.type === "invite_admin"
-                          ? `Invite ${modalState.data?.role}`
-                          : "Add New Region"}
+                        Invite ${modalState.data?.role}
                       </h3>
                       <button
                         onClick={() =>
@@ -482,36 +515,21 @@ export default function RegionsPage() {
                       </button>
                     </div>
                     <div className="p-6 space-y-4">
-                      {modalState.type === "invite_admin" && (
-                        <>
-                          <p className="text-sm text-[#60646C]">
-                            You are inviting a new {modalState.data?.role} to
-                            manage <strong>{modalState.data?.entity}</strong>.
-                            They will receive an email to set up their account.
-                          </p>
-                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-[#8E8E93] uppercase">
-                              Email Address
-                            </label>
-                            <input
-                              className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
-                              placeholder="admin@example.com"
-                              type="email"
-                            />
-                          </div>
-                        </>
-                      )}
-                      {modalState.type === "region" && (
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold text-[#8E8E93] uppercase">
-                            Region Name
-                          </label>
-                          <input
-                            className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
-                            placeholder="Enter region name..."
-                          />
-                        </div>
-                      )}
+                      <p className="text-sm text-[#60646C]">
+                        You are inviting a new {modalState.data?.role} to manage{" "}
+                        <strong>{modalState.data?.entity}</strong>. They will
+                        receive an email to set up their account.
+                      </p>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#8E8E93] uppercase">
+                          Email Address
+                        </label>
+                        <input
+                          className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
+                          placeholder="admin@example.com"
+                          type="email"
+                        />
+                      </div>
                       <div className="pt-4 flex justify-end gap-3">
                         <Button
                           variant="outline"
@@ -534,9 +552,7 @@ export default function RegionsPage() {
                             })
                           }
                         >
-                          {modalState.type === "invite_admin"
-                            ? "Send Invitation"
-                            : "Save"}
+                          Send Invitation
                         </Button>
                       </div>
                     </div>

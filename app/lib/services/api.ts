@@ -85,11 +85,22 @@ class ApiClient {
     });
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<T> {
+  async put<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    const body =
+      data instanceof FormData ? data : data ? JSON.stringify(data) : undefined;
+    
+    const defaultHeaders: Record<string, string> = data instanceof FormData 
+      ? {} 
+      : data ? { "Content-Type": "application/json" } : {};
+
     return this.request<T>(endpoint, {
       method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
-      headers: data ? { "Content-Type": "application/json" } : {},
+      body,
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options?.headers,
+      },
     });
   }
 

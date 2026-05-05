@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import type { Route } from "./+types/countries";
 import {
   Globe,
   Plus,
   Mail,
   Edit,
+  Eye,
   Search,
   ChevronDown,
   Check,
@@ -146,12 +147,10 @@ export default function CountriesPage() {
     });
   };
 
-  const handleAddCountry = () => {
-    setModalState({ isOpen: true, type: "country", data: null });
-  };
-
   return (
-    <RoleGuard allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"]}>
+    <RoleGuard
+      allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN"]}
+    >
       <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
         <AppSidebar user={user} />
 
@@ -176,9 +175,6 @@ export default function CountriesPage() {
                       : `Total ${visibleCountries.length} countries in your jurisdiction.`}
                   </p>
                 </div>
-                <Button onClick={handleAddCountry}>
-                  <Plus size={18} className="mr-2" /> Add Country
-                </Button>
               </div>
 
               <Card>
@@ -297,10 +293,15 @@ export default function CountriesPage() {
                                   className="w-8 h-6 object-cover rounded border shadow-sm"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
-                                    const fallback = document.createElement('div');
-                                    fallback.className = "w-8 h-6 rounded bg-[#E8E6FC] text-[#5850DE] flex items-center justify-center text-xs font-bold";
+                                    const fallback =
+                                      document.createElement("div");
+                                    fallback.className =
+                                      "w-8 h-6 rounded bg-[#E8E6FC] text-[#5850DE] flex items-center justify-center text-xs font-bold";
                                     fallback.textContent = country.code;
-                                    e.currentTarget.parentNode?.replaceChild(fallback, e.currentTarget);
+                                    e.currentTarget.parentNode?.replaceChild(
+                                      fallback,
+                                      e.currentTarget,
+                                    );
                                   }}
                                 />
                               ) : (
@@ -309,7 +310,12 @@ export default function CountriesPage() {
                                 </div>
                               )}
                               <div>
-                                <div>{country.name}</div>
+                                <Link 
+                                  to={`/countries/${country.id}`}
+                                  className="hover:text-[#5850DE] transition-colors font-bold"
+                                >
+                                  {country.name}
+                                </Link>
                               </div>
                             </td>
                             <td className="p-4 font-mono text-[#60646C] text-sm">
@@ -326,13 +332,25 @@ export default function CountriesPage() {
                             </td>
                             <td className="p-4 text-right">
                               <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  className="px-2"
-                                  title="Edit Country"
-                                >
-                                  <Edit size={18} />
-                                </Button>
+                                {user?.role === 'SUPER_ADMIN' ? (
+                                  <Button
+                                    variant="ghost"
+                                    className="px-2"
+                                    title="Edit Country"
+                                    onClick={() => navigate(`/countries/${country.id}`)}
+                                  >
+                                    <Edit size={18} />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    className="px-2"
+                                    title="View Country"
+                                    onClick={() => navigate(`/countries/${country.id}`)}
+                                  >
+                                    <Eye size={18} />
+                                  </Button>
+                                )}
                                 <Button
                                   variant="outline"
                                   onClick={() =>
@@ -393,15 +411,13 @@ export default function CountriesPage() {
                 )}
               </Card>
 
-              {/* Modal for invite/add actions */}
+              {/* Modal for invite admin */}
               {modalState.isOpen && (
                 <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
                   <Card className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
                     <div className="p-6 border-b border-[#E0E1E6] flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-[#1B173A]">
-                        {modalState.type === "invite_admin"
-                          ? `Invite ${modalState.data?.role}`
-                          : "Add New Country"}
+                        Invite ${modalState.data?.role}
                       </h3>
                       <button
                         onClick={() =>
@@ -413,36 +429,21 @@ export default function CountriesPage() {
                       </button>
                     </div>
                     <div className="p-6 space-y-4">
-                      {modalState.type === "invite_admin" && (
-                        <>
-                          <p className="text-sm text-[#60646C]">
-                            You are inviting a new {modalState.data?.role} to
-                            manage <strong>{modalState.data?.entity}</strong>.
-                            They will receive an email to set up their account.
-                          </p>
-                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-[#8E8E93] uppercase">
-                              Email Address
-                            </label>
-                            <input
-                              className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
-                              placeholder="admin@example.com"
-                              type="email"
-                            />
-                          </div>
-                        </>
-                      )}
-                      {modalState.type === "country" && (
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold text-[#8E8E93] uppercase">
-                            Country Name
-                          </label>
-                          <input
-                            className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
-                            placeholder="Enter country name..."
-                          />
-                        </div>
-                      )}
+                      <p className="text-sm text-[#60646C]">
+                        You are inviting a new {modalState.data?.role} to manage{" "}
+                        <strong>{modalState.data?.entity}</strong>. They will
+                        receive an email to set up their account.
+                      </p>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#8E8E93] uppercase">
+                          Email Address
+                        </label>
+                        <input
+                          className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
+                          placeholder="admin@example.com"
+                          type="email"
+                        />
+                      </div>
                       <div className="pt-4 flex justify-end gap-3">
                         <Button
                           variant="outline"
@@ -465,9 +466,7 @@ export default function CountriesPage() {
                             })
                           }
                         >
-                          {modalState.type === "invite_admin"
-                            ? "Send Invitation"
-                            : "Save"}
+                          Send Invitation
                         </Button>
                       </div>
                     </div>

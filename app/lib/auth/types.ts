@@ -182,6 +182,7 @@ export interface UsersQueryParams {
   search?: string;
   orderBy?: 'firstName' | 'lastName' | 'email' | 'username' | 'birthdate';
   type?: 'ascending' | 'descending';
+  userRole?: UserRole;
 }
 
 // Regions API types
@@ -191,7 +192,12 @@ export interface ApiRegion {
   __v: number;
   admins: any[];
   createdAt: string;
-  image: string | null;
+  image: {
+    name: string;
+    extension: string;
+    createdAt: string;
+    url: string;
+  } | null;
   updatedAt: string;
   adminCount: number;
 }
@@ -264,7 +270,7 @@ export interface ApiCountry {
   createdAt: string;
   updatedAt: string;
   __v: number;
-  adminCount: number;
+  adminCount?: number; // Optional since it's calculated from admins array
 }
 
 export interface CountriesResponse {

@@ -73,14 +73,14 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ user }) => {
       id: "regions",
       label: "Regions",
       icon: Globe,
-      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"],
+      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN"],
       path: "/regions",
     },
     {
       id: "countries",
       label: "Countries",
       icon: Globe,
-      roles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"],
+      roles: ["SUPER_ADMIN", "REGIONAL_ADMIN"],
       path: "/countries",
     },
     {
