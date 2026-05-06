@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import type { Route } from "./+types/companies";
 import { Building2, Plus, Mail, Edit, Search, ChevronDown, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, Card, Badge, Input } from "~/components/ui";
@@ -10,6 +10,7 @@ import { useUser } from "~/hooks/useAuth";
 import { useCompanies } from "~/hooks/useAuthApi";
 import type { ApiCompany } from "~/lib/auth/types";
 import NewCompanyForm from "~/components/forms/NewCompanyForm";
+import { InviteCompanyAdminModal } from "~/components/modals/InviteCompanyAdminModal";
 
 
 export function meta({}: Route.MetaArgs) {
@@ -43,6 +44,16 @@ export default function CompaniesPage() {
     isOpen: false,
     type: "",
     data: null,
+  });
+
+  const [inviteModalState, setInviteModalState] = useState<{
+    isOpen: boolean;
+    companyId: string;
+    companyName: string;
+  }>({
+    isOpen: false,
+    companyId: "",
+    companyName: "",
   });
 
   const sortOptions = [
@@ -122,11 +133,11 @@ export default function CompaniesPage() {
     console.error('Error fetching companies:', error);
   }
 
-  const handleInviteAdmin = (companyName: string) => {
-    setModalState({
+  const handleInviteAdmin = (companyId: string, companyName: string) => {
+    setInviteModalState({
       isOpen: true,
-      type: "invite_admin",
-      data: { entity: companyName, role: "Company Admin" },
+      companyId,
+      companyName,
     });
   };
 
@@ -272,7 +283,12 @@ export default function CompaniesPage() {
                           <Building2 size={16} />
                         </div>
                         <div>
-                          <div>{comp.name}</div>
+                          <Link 
+                            to={`/companies/${comp.id}`}
+                            className="hover:text-[#5850DE] transition-colors font-bold"
+                          >
+                            {comp.name}
+                          </Link>
                           <div className="text-xs text-[#8E8E93] font-normal">{comp.email}</div>
                         </div>
                       </td>
@@ -300,12 +316,15 @@ export default function CompaniesPage() {
                             variant="ghost"
                             className="px-2"
                             title="Edit Company"
+                            asChild
                           >
-                            <Edit size={18} />
+                            <Link to={`/companies/${comp.id}`}>
+                              <Edit size={18} />
+                            </Link>
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => handleInviteAdmin(comp.name)}
+                            onClick={() => handleInviteAdmin(comp.id, comp.name)}
                           >
                             <Mail size={16} className="mr-2" /> Invite Admin
                           </Button>
@@ -352,67 +371,23 @@ export default function CompaniesPage() {
           )}
         </Card>
 
-        {/* Modal for invite/add actions */}
-        {modalState.isOpen && (
+        {/* Modal for add actions */}
+        {modalState.isOpen && modalState.type === "company" && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-            {modalState.type === "company" ? (
-              <NewCompanyForm
-                onSuccess={handleCompanyCreated}
-                onCancel={() => setModalState({ isOpen: false, type: "", data: null })}
-              />
-            ) : (
-              <Card className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="p-6 border-b border-[#E0E1E6] flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-[#1B173A]">
-                    Invite {modalState.data?.role}
-                  </h3>
-                  <button
-                    onClick={() =>
-                      setModalState({ isOpen: false, type: "", data: null })
-                    }
-                    className="text-[#8E8E93] hover:text-[#1B173A] transition"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="p-6 space-y-4">
-                  <p className="text-sm text-[#60646C]">
-                    You are inviting a new {modalState.data?.role} to manage{" "}
-                    <strong>{modalState.data?.entity}</strong>. They will
-                    receive an email to set up their account.
-                  </p>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-[#8E8E93] uppercase">
-                      Email Address
-                    </label>
-                    <input
-                      className="w-full px-3 py-2 border border-[#E0E1E6] rounded-lg focus:border-[#5850DE] outline-none"
-                      placeholder="admin@example.com"
-                      type="email"
-                    />
-                  </div>
-                  <div className="pt-4 flex justify-end gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setModalState({ isOpen: false, type: "", data: null })
-                      }
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        setModalState({ isOpen: false, type: "", data: null })
-                      }
-                    >
-                      Send Invitation
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            )}
+            <NewCompanyForm
+              onSuccess={handleCompanyCreated}
+              onCancel={() => setModalState({ isOpen: false, type: "", data: null })}
+            />
           </div>
         )}
+
+        {/* Invite Company Admin Modal */}
+        <InviteCompanyAdminModal
+          isOpen={inviteModalState.isOpen}
+          onClose={() => setInviteModalState({ isOpen: false, companyId: "", companyName: "" })}
+          companyId={inviteModalState.companyId}
+          companyName={inviteModalState.companyName}
+        />
           </div>
         </div>
       </div>

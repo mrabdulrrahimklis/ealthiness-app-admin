@@ -228,7 +228,13 @@ export interface ApiCompany {
   email: string;
   address: string;
   countryId: string;
-  logo: string | null;
+  logo: {
+    name: string;
+    extension: string;
+    createdAt: string;
+    url: string;
+    _id: string;
+  } | null;
   status: string;
   employees: string[];
   admins: string[];
@@ -236,6 +242,19 @@ export interface ApiCompany {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  // New fields from /stats endpoint
+  country?: {
+    _id: string;
+    name: string;
+    alpha2: string;
+    alpha3: string;
+    region: {
+      _id: string;
+      name: string;
+    };
+  };
+  userCount?: number;
+  adminCount?: number; // Optional since it's calculated from admins array
 }
 
 export interface CompaniesResponse {

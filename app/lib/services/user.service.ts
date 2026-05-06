@@ -406,3 +406,10 @@ export function buildCountryDetailsEndpoint(countryId: string): string {
 export function buildRegionDetailsEndpoint(regionId: string): string {
   return `/v1/region/${regionId}/stats`;
 }
+
+/**
+ * Builds the endpoint for getting company details by ID
+ */
+export function buildCompanyDetailsEndpoint(companyId: string): string {
+  return `/v1/company/${companyId}`;
+}

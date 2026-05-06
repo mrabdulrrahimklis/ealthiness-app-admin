@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "~/lib/services/api";
 import { clientTokens } from "~/lib/auth/client-cookies";
 import { transformApiUser } from "~/lib/auth/utils";
-import { buildUsersQueryString, buildUserDetailsEndpoint, buildRegionsQueryString, buildCompaniesQueryString, buildCountriesQueryString, buildCountryDetailsEndpoint, buildRegionDetailsEndpoint } from "~/lib/services/user.service";
-import type { User, LoginCredentials, ApiAuthResponse, UsersResponse, UsersQueryParams, ApiUser, RegionsResponse, RegionsQueryParams, CompaniesResponse, CompaniesQueryParams, CountriesResponse, CountriesQueryParams, ApiCountry, ApiRegion } from "~/lib/auth/types";
+import { buildUsersQueryString, buildUserDetailsEndpoint, buildRegionsQueryString, buildCompaniesQueryString, buildCountriesQueryString, buildCountryDetailsEndpoint, buildRegionDetailsEndpoint, buildCompanyDetailsEndpoint } from "~/lib/services/user.service";
+import type { User, LoginCredentials, ApiAuthResponse, UsersResponse, UsersQueryParams, ApiUser, RegionsResponse, RegionsQueryParams, CompaniesResponse, CompaniesQueryParams, CountriesResponse, CountriesQueryParams, ApiCountry, ApiRegion, ApiCompany } from "~/lib/auth/types";
 
 interface LoginResponse extends ApiAuthResponse {
   user?: User;
@@ -473,6 +473,124 @@ export function useInviteRegionAdmin() {
       queryClient.invalidateQueries({ queryKey: ["region", variables.regionId] });
       // Invalidate regions list as well
       queryClient.invalidateQueries({ queryKey: ["regions"] });
+    },
+  });
+}
+
+export function useInviteCompanyAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      companyId,
+      email,
+    }: {
+      companyId: string;
+      email: string;
+    }): Promise<{ message: string }> => {
+      const tokens = clientTokens.get();
+      if (!tokens) {
+        throw new Error("No access token available");
+      }
+
+      try {
+        const endpoint = `/v1/admin/company/${companyId}/invite?email=${encodeURIComponent(email)}`;
+        const response = await apiClient.post<{ message: string }>(endpoint);
+        return response;
+      } catch (error) {
+        console.error("Error inviting company admin:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch company details to update admin list
+      queryClient.invalidateQueries({ queryKey: ["company", variables.companyId] });
+      // Invalidate companies list as well
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    },
+  });
+}
+
+export function useCompanyDetails(companyId: string) {
+  return useQuery({
+    queryKey: ["company", companyId],
+    queryFn: async (): Promise<ApiCompany> => {
+      const tokens = clientTokens.get();
+      if (!tokens) {
+        throw new Error("No access token available");
+      }
+
+      try {
+        const endpoint = buildCompanyDetailsEndpoint(companyId);
+        const response = await apiClient.get<ApiCompany>(endpoint);
+        return response;
+      } catch (error) {
+        console.error("Error fetching company details:", error);
+        throw error;
+      }
+    },
+    retry: (failureCount, error) => {
+      // Don't retry if no tokens or auth error
+      return failureCount < 2 && !!clientTokens.get();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!clientTokens.get() && !!companyId, // Only run if we have tokens and companyId
+  });
+}
+
+export function useUpdateCompany() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      companyId,
+      data,
+    }: {
+      companyId: string;
+      data: {
+        name?: string;
+        email?: string;
+        address?: string;
+        logo?: File;
+      };
+    }): Promise<ApiCompany> => {
+      const tokens = clientTokens.get();
+      if (!tokens) {
+        throw new Error("No access token available");
+      }
+
+      try {
+        const endpoint = buildCompanyDetailsEndpoint(companyId);
+        
+        // Use FormData if there's a file, otherwise JSON
+        if (data.logo) {
+          const formData = new FormData();
+          if (data.name) formData.append('name', data.name);
+          if (data.email) formData.append('email', data.email);
+          if (data.address) formData.append('address', data.address);
+          formData.append('logo', data.logo);
+          
+          const response = await apiClient.put<ApiCompany>(endpoint, formData);
+          return response;
+        } else {
+          // Filter out undefined values and logo
+          const cleanData = Object.entries(data)
+            .filter(([key, value]) => value !== undefined && key !== 'logo')
+            .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+            
+          const response = await apiClient.put<ApiCompany>(endpoint, cleanData);
+          return response;
+        }
+      } catch (error) {
+        console.error("Error updating company:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch company details
+      queryClient.invalidateQueries({ queryKey: ["company", variables.companyId] });
+      // Invalidate companies list as well
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
 }
