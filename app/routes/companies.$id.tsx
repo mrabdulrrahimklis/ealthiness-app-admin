@@ -118,10 +118,13 @@ export default function CompanyDetailPage({
     useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user can edit (only SUPER_ADMIN, COUNTRY_ADMIN, REGIONAL_ADMIN)
-  const canEdit = ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN"].includes(
-    user?.role || "",
-  );
+  // Check if user can edit (only SUPER_ADMIN, COUNTRY_ADMIN, REGIONAL_ADMIN, COMPANY_ADMIN)
+  const canEdit = [
+    "SUPER_ADMIN",
+    "COUNTRY_ADMIN",
+    "REGIONAL_ADMIN",
+    "COMPANY_ADMIN",
+  ].includes(user?.role || "");
 
   // Form state
   const [editForm, setEditForm] = useState({
@@ -850,10 +853,6 @@ export default function CompanyDetailPage({
                           View Users
                         </Button>
                       </Link>
-                      <Button className="w-full" variant="outline">
-                        <Globe size={16} className="mr-2" />
-                        Analytics Dashboard
-                      </Button>
                     </div>
                   </Card>
                 </div>

@@ -19,7 +19,11 @@ import AppSidebar from "~/components/shared/AppSidebar";
 import Navbar from "~/components/shared/Navbar";
 import { RoleGuard } from "~/components/auth/RoleGuard";
 import { useUser } from "~/hooks/useAuth";
-import { useCountryUsers, useCountryDetails, useRemoveCountryAdmin } from "~/hooks/useAuthApi";
+import {
+  useCountryUsers,
+  useCountryDetails,
+  useRemoveCountryAdmin,
+} from "~/hooks/useAuthApi";
 import type { ApiUser } from "~/lib/auth/types";
 
 export function meta({}: Route.MetaArgs) {
@@ -74,10 +78,8 @@ export default function CountryUsersPage({
   ];
 
   // Fetch country details for the country name
-  const {
-    data: apiCountry,
-    isLoading: isLoadingCountry,
-  } = useCountryDetails(actualCountryId);
+  const { data: apiCountry, isLoading: isLoadingCountry } =
+    useCountryDetails(actualCountryId);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -193,10 +195,7 @@ export default function CountryUsersPage({
 
   return (
     <RoleGuard
-      allowedRoles={[
-        "SUPER_ADMIN",
-        "REGIONAL_ADMIN",
-      ]}
+      allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN", "COUNTRY_ADMIN"]}
     >
       <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
         <AppSidebar user={user} />
@@ -595,7 +594,8 @@ export default function CountryUsersPage({
               <div className="space-y-4">
                 <p className="text-gray-700">
                   Are you sure you want to remove the country admin role from{" "}
-                  <strong>{removeAdminConfirmation.userName}</strong>? This will revoke their administrative privileges for this country.
+                  <strong>{removeAdminConfirmation.userName}</strong>? This will
+                  revoke their administrative privileges for this country.
                 </p>
 
                 {removeAdminMutation.error && (

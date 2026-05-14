@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router";
 import type { Route } from "./+types/countries";
 import {
-  Globe,
-  Plus,
   Mail,
   Edit,
   Eye,
@@ -157,9 +155,7 @@ export default function CountriesPage() {
   };
 
   return (
-    <RoleGuard
-      allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN"]}
-    >
+    <RoleGuard allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN", "COUNTRY_ADMIN"]}>
       <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
         <AppSidebar user={user} />
 
@@ -208,7 +204,7 @@ export default function CountriesPage() {
                         <Button
                           variant="outline"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                          className="flex items-center gap-2 min-w-[140px] justify-between"
+                          className="flex items-center gap-2 min-w-35 justify-between"
                         >
                           {sortOptions.find(
                             (option) => option.value === orderBy,
@@ -319,7 +315,7 @@ export default function CountriesPage() {
                                 </div>
                               )}
                               <div>
-                                <Link 
+                                <Link
                                   to={`/countries/${country.id}`}
                                   className="hover:text-[#5850DE] transition-colors font-bold"
                                 >
@@ -341,12 +337,14 @@ export default function CountriesPage() {
                             </td>
                             <td className="p-4 text-right">
                               <div className="flex justify-end gap-2">
-                                {user?.role === 'SUPER_ADMIN' ? (
+                                {user?.role === "SUPER_ADMIN" ? (
                                   <Button
                                     variant="ghost"
                                     className="px-2"
                                     title="Edit Country"
-                                    onClick={() => navigate(`/countries/${country.id}`)}
+                                    onClick={() =>
+                                      navigate(`/countries/${country.id}`)
+                                    }
                                   >
                                     <Edit size={18} />
                                   </Button>
@@ -355,20 +353,24 @@ export default function CountriesPage() {
                                     variant="ghost"
                                     className="px-2"
                                     title="View Country"
-                                    onClick={() => navigate(`/countries/${country.id}`)}
+                                    onClick={() =>
+                                      navigate(`/countries/${country.id}`)
+                                    }
                                   >
                                     <Eye size={18} />
                                   </Button>
                                 )}
-                                <Button
-                                  variant="outline"
-                                  onClick={() =>
-                                    handleInviteAdmin(country.id, country.name)
-                                  }
-                                >
-                                  <Mail size={16} className="mr-2" /> Invite
-                                  Admin
-                                </Button>
+                                {user?.role === "SUPER_ADMIN" && (
+                                  <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleInviteAdmin(country.id, country.name)
+                                    }
+                                  >
+                                    <Mail size={16} className="mr-2" /> Invite
+                                    Admin
+                                  </Button>
+                                )}
                               </div>
                             </td>
                           </tr>

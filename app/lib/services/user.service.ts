@@ -397,7 +397,7 @@ export function buildCountriesQueryString(
  * Builds the endpoint for getting country details by ID
  */
 export function buildCountryDetailsEndpoint(countryId: string): string {
-  return `/v1/country/${countryId}/stats`;
+  return `/v1/country/${countryId}`;
 }
 
 /**

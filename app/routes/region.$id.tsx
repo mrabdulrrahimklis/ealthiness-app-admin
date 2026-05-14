@@ -111,8 +111,9 @@ export default function RegionDetailPage({
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user can edit (only SUPER_ADMIN)
-  const canEdit = user?.role === "SUPER_ADMIN";
+  // Check if user can edit (SUPER_ADMIN and REGIONAL_ADMIN)
+  const canEdit =
+    user?.role === "SUPER_ADMIN" || user?.role === "REGIONAL_ADMIN";
 
   // Form state
   const [editForm, setEditForm] = useState({
@@ -743,41 +744,43 @@ export default function RegionDetailPage({
                     </div>
                   </Card>
 
-                  {/* Action Buttons */}
-                  <Card className="p-6">
-                    <h3 className="text-lg font-extrabold text-[#1B173A] mb-4">
-                      Quick Actions
-                    </h3>
-                    <div className="space-y-3">
-                      <Button
-                        className="w-full"
-                        variant="outline"
-                        onClick={handleOpenInviteModal}
-                        disabled={!canEdit}
-                      >
-                        <Mail size={16} className="mr-2" />
-                        Invite Admin
-                      </Button>
-                      <Link to={`/regions/${actualRegionId}/countries`}>
-                        <Button className="w-full mb-3" variant="outline">
-                          <Globe size={16} className="mr-2" />
-                          Manage Countries
+                  {/* Action Buttons - Only show for SUPER_ADMIN and REGIONAL_ADMIN */}
+                  {user?.role !== "COUNTRY_ADMIN" && (
+                    <Card className="p-6">
+                      <h3 className="text-lg font-extrabold text-[#1B173A] mb-4">
+                        Quick Actions
+                      </h3>
+                      <div className="space-y-3">
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={handleOpenInviteModal}
+                          disabled={!canEdit}
+                        >
+                          <Mail size={16} className="mr-2" />
+                          Invite Admin
                         </Button>
-                      </Link>
-                      <Link to={`/regions/${actualRegionId}/companies`}>
-                        <Button className="w-full" variant="outline">
-                          <Building size={16} className="mr-2" />
-                          View Companies
-                        </Button>
-                      </Link>
-                      <Link to={`/region/${actualRegionId}/users`}>
-                        <Button className="w-full" variant="outline">
-                          <Users2 size={16} className="mr-2" />
-                          View Users
-                        </Button>
-                      </Link>
-                    </div>
-                  </Card>
+                        <Link to={`/regions/${actualRegionId}/countries`}>
+                          <Button className="w-full mb-3" variant="outline">
+                            <Globe size={16} className="mr-2" />
+                            Manage Countries
+                          </Button>
+                        </Link>
+                        <Link to={`/regions/${actualRegionId}/companies`}>
+                          <Button className="w-full mb-3" variant="outline">
+                            <Building size={16} className="mr-2" />
+                            View Companies
+                          </Button>
+                        </Link>
+                        <Link to={`/regions/${actualRegionId}/users`}>
+                          <Button className="w-full" variant="outline">
+                            <Users2 size={16} className="mr-2" />
+                            View Users
+                          </Button>
+                        </Link>
+                      </div>
+                    </Card>
+                  )}
                 </div>
               </div>
             </div>

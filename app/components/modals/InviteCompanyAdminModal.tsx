@@ -11,22 +11,23 @@ interface InviteCompanyAdminModalProps {
   companyName: string;
 }
 
-export const InviteCompanyAdminModal: React.FC<InviteCompanyAdminModalProps> = ({
-  isOpen,
-  onClose,
-  companyId,
-  companyName,
-}) => {
+export const InviteCompanyAdminModal: React.FC<
+  InviteCompanyAdminModalProps
+> = ({ isOpen, onClose, companyId, companyName }) => {
   const [inviteEmail, setInviteEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const inviteAdminMutation = useInviteCompanyAdmin();
 
   const handleClose = () => {
     setInviteEmail("");
+    setErrorMessage("");
     onClose();
   };
 
   const handleInviteAdmin = async () => {
     if (!inviteEmail.trim()) return;
+
+    setErrorMessage("");
 
     try {
       await inviteAdminMutation.mutateAsync({
@@ -36,6 +37,11 @@ export const InviteCompanyAdminModal: React.FC<InviteCompanyAdminModalProps> = (
       handleClose();
     } catch (error) {
       console.error("Failed to invite admin:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to send invitation. Please try again.",
+      );
     }
   };
 
@@ -43,19 +49,20 @@ export const InviteCompanyAdminModal: React.FC<InviteCompanyAdminModalProps> = (
   useEffect(() => {
     if (isOpen) {
       inviteAdminMutation.reset();
+      setErrorMessage("");
     }
-  }, [isOpen, inviteAdminMutation]);
+  }, [isOpen]);
 
   if (!isOpen || typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-10000">
       <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-extrabold text-[#1B173A] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#5850DE] to-[#248FEC] text-white flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#5850DE] to-[#248FEC] text-white flex items-center justify-center">
               <Mail size={20} />
             </div>
             Invite Company Admin
@@ -94,11 +101,9 @@ export const InviteCompanyAdminModal: React.FC<InviteCompanyAdminModalProps> = (
             </p>
           </div>
 
-          {inviteAdminMutation.error && (
+          {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">
-                Failed to send invitation. Please try again.
-              </p>
+              <p className="text-sm text-red-800">{errorMessage}</p>
             </div>
           )}
 
@@ -140,6 +145,6 @@ export const InviteCompanyAdminModal: React.FC<InviteCompanyAdminModalProps> = (
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };

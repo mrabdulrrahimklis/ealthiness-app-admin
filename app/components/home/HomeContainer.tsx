@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import {
   Users,
@@ -16,6 +16,8 @@ import {
   TrendingUp,
   CheckCircle2,
   AlertCircle,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import {
   LineChart,
@@ -43,6 +45,7 @@ import {
   CardTitle,
   CardContent,
   Badge,
+  Button,
 } from "~/components/ui";
 import MetricsCard from "./MetricsCard";
 import QuickActions from "./QuickActions";
@@ -236,6 +239,29 @@ const HomeContainer: React.FC<HomeContainerProps> = ({ userData }) => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState("7d");
   const [refreshing, setRefreshing] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const timeRangeOptions = [
+    { value: "24h", label: "Last 24 Hours" },
+    { value: "7d", label: "Last 7 Days" },
+    { value: "30d", label: "Last 30 Days" },
+    { value: "90d", label: "Last 90 Days" },
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1500);
@@ -316,16 +342,46 @@ const HomeContainer: React.FC<HomeContainerProps> = ({ userData }) => {
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  className="px-4 py-2 bg-white border border-[#E0E1E6] rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#5850DE]"
-                >
-                  <option value="24h">Last 24 Hours</option>
-                  <option value="7d">Last 7 Days</option>
-                  <option value="30d">Last 30 Days</option>
-                  <option value="90d">Last 90 Days</option>
-                </select>
+                <div className="relative" ref={dropdownRef}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="justify-between min-w-[160px] bg-white border border-[#E0E1E6] rounded-xl px-4 py-2.5 text-sm font-semibold text-[#1B173A] hover:border-[#5850DE] hover:bg-white focus:border-[#5850DE] focus:ring-2 focus:ring-[#5850DE]/10 transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    {
+                      timeRangeOptions.find((option) => option.value === timeRange)
+                        ?.label
+                    }
+                    <ChevronDown
+                      size={16}
+                      className={`text-[#8E8E93] transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+                    />
+                  </Button>
+
+                  {isDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-1 bg-white border border-[#E0E1E6] rounded-xl shadow-lg z-50 py-1 min-w-full">
+                      {timeRangeOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setTimeRange(option.value);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-[#F0F0F3] transition-colors flex items-center justify-between ${
+                            timeRange === option.value
+                              ? "text-[#5850DE] bg-[#F0F0F3]"
+                              : "text-[#1B173A]"
+                          }`}
+                        >
+                          {option.label}
+                          {timeRange === option.value && (
+                            <Check size={16} className="text-[#5850DE]" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

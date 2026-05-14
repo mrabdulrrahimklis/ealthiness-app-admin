@@ -18,16 +18,20 @@ export const InviteCompanyEmployeeModal: React.FC<InviteCompanyEmployeeModalProp
   companyName,
 }) => {
   const [inviteEmail, setInviteEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const inviteEmployeeMutation = useInviteCompanyEmployee();
 
   const handleClose = () => {
     setInviteEmail("");
+    setErrorMessage("");
     onClose();
   };
 
   const handleInviteEmployee = async () => {
     if (!inviteEmail.trim()) return;
 
+    setErrorMessage("");
+    
     try {
       await inviteEmployeeMutation.mutateAsync({
         companyId,
@@ -36,6 +40,11 @@ export const InviteCompanyEmployeeModal: React.FC<InviteCompanyEmployeeModalProp
       handleClose();
     } catch (error) {
       console.error("Failed to invite employee:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to send invitation. Please try again."
+      );
     }
   };
 
@@ -43,8 +52,9 @@ export const InviteCompanyEmployeeModal: React.FC<InviteCompanyEmployeeModalProp
   useEffect(() => {
     if (isOpen) {
       inviteEmployeeMutation.reset();
+      setErrorMessage("");
     }
-  }, [isOpen, inviteEmployeeMutation]);
+  }, [isOpen]);
 
   if (!isOpen || typeof document === "undefined") {
     return null;
@@ -94,10 +104,10 @@ export const InviteCompanyEmployeeModal: React.FC<InviteCompanyEmployeeModalProp
             </p>
           </div>
 
-          {inviteEmployeeMutation.error && (
+          {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800">
-                Failed to send invitation. Please try again.
+                {errorMessage}
               </p>
             </div>
           )}

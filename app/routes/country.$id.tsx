@@ -124,7 +124,7 @@ export default function CountryDetailPage({
   const regionButtonRef = useRef<HTMLButtonElement>(null);
 
   // Check if user can edit (only SUPER_ADMIN)
-  const canEdit = user?.role === "SUPER_ADMIN";
+  const canEdit = user?.role === "COMPANY_ADMIN";
 
   // Form state
   const [editForm, setEditForm] = useState({
@@ -314,8 +314,8 @@ export default function CountryDetailPage({
     adminCount: apiCountry.admins?.length || 0, // Calculate from admins array
     flag: apiCountry.flag,
     createdAt: new Date(apiCountry.createdAt).toLocaleDateString(),
-    totalUsers: apiCountry.userCount, // Use real data from API
-    totalCompanies: apiCountry.companyCount, // Use real data from API
+    totalUsers: apiCountry.userCount || 0, // Use real data from API with fallback
+    totalCompanies: apiCountry.companyCount || 0, // Use real data from API with fallback
     monthlyGrowth: "+12%", // Mock data - would need historical data to calculate
     healthScore: 87, // Mock data - would need analytics to calculate
   });
@@ -347,7 +347,9 @@ export default function CountryDetailPage({
 
   if (countryError) {
     return (
-      <RoleGuard allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN"]}>
+      <RoleGuard
+        allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN", "COUNTRY_ADMIN"]}
+      >
         <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
           <AppSidebar user={user} />
           <div className="flex-1 flex items-center justify-center">
@@ -376,7 +378,9 @@ export default function CountryDetailPage({
   const country = transformApiCountryToDetails(apiCountry);
 
   return (
-    <RoleGuard allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN"]}>
+    <RoleGuard
+      allowedRoles={["SUPER_ADMIN", "REGIONAL_ADMIN", "COUNTRY_ADMIN"]}
+    >
       <div className="min-h-screen bg-[#F8F9FB] font-sans flex">
         <AppSidebar user={user} />
 
@@ -420,7 +424,7 @@ export default function CountryDetailPage({
                       {country.code}
                     </div>
                   )}
-                  {isEditing && canEdit && (
+                  {isEditing && !canEdit && (
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#5850DE] rounded-full flex items-center justify-center hover:bg-[#4A42C7] transition-colors"
@@ -438,7 +442,7 @@ export default function CountryDetailPage({
                         {country.name}
                       </h2>
                       <Globe size={24} className="text-blue-400" />
-                      {!isEditing && canEdit && (
+                      {!isEditing && !canEdit && (
                         <button
                           onClick={handleEdit}
                           className="ml-4 p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -950,7 +954,7 @@ export default function CountryDetailPage({
                         className="w-full"
                         variant="outline"
                         onClick={handleOpenInviteModal}
-                        disabled={!canEdit}
+                        disabled={canEdit}
                       >
                         <Mail size={16} className="mr-2" />
                         Invite Admin

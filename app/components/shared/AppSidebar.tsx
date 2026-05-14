@@ -7,6 +7,7 @@ import {
   Users,
   HeartPulse,
   Settings,
+  MapPin,
 } from "lucide-react";
 
 import type { User } from "~/lib/auth/types";
@@ -66,7 +67,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ user }) => {
       id: "dashboard",
       label: "Overview",
       icon: LayoutGrid,
-      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"],
+      roles: [
+        "SUPER_ADMIN",
+        "COUNTRY_ADMIN",
+        "REGIONAL_ADMIN",
+        "COMPANY_ADMIN",
+      ],
       path: "/home",
     },
     {
@@ -79,22 +85,32 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ user }) => {
     {
       id: "countries",
       label: "Countries",
-      icon: Globe,
-      roles: ["SUPER_ADMIN", "REGIONAL_ADMIN"],
+      icon: MapPin,
+      roles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "COUNTRY_ADMIN"],
       path: "/countries",
     },
     {
       id: "companies",
       label: "Companies",
       icon: Building2,
-      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN"],
+      roles: [
+        "SUPER_ADMIN",
+        "COUNTRY_ADMIN",
+        "REGIONAL_ADMIN",
+        "COMPANY_ADMIN",
+      ],
       path: "/companies",
     },
     {
       id: "customers",
       label: normalizedRole === "COMPANY_ADMIN" ? "My Users" : "All Users",
       icon: Users,
-      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"],
+      roles: [
+        "SUPER_ADMIN",
+        "COUNTRY_ADMIN",
+        "REGIONAL_ADMIN",
+        "COMPANY_ADMIN",
+      ],
       path: "/customers",
     },
   ];
@@ -104,7 +120,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ user }) => {
       id: "settings",
       label: "Settings",
       icon: Settings,
-      roles: ["SUPER_ADMIN", "COUNTRY_ADMIN", "REGIONAL_ADMIN", "COMPANY_ADMIN"],
+      roles: [
+        "SUPER_ADMIN",
+        "COUNTRY_ADMIN",
+        "REGIONAL_ADMIN",
+        "COMPANY_ADMIN",
+      ],
       path: "/settings",
     },
   ];
@@ -120,7 +141,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ user }) => {
     if (itemId === "dashboard") {
       return location.pathname === "/" || location.pathname === "/home";
     }
-    return location.pathname === itemPath;
+    return location.pathname.startsWith(itemPath);
   };
 
   return (

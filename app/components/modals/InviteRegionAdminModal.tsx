@@ -18,16 +18,20 @@ export const InviteRegionAdminModal: React.FC<InviteRegionAdminModalProps> = ({
   regionName,
 }) => {
   const [inviteEmail, setInviteEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const inviteAdminMutation = useInviteRegionAdmin();
 
   const handleClose = () => {
     setInviteEmail("");
+    setErrorMessage("");
     onClose();
   };
 
   const handleInviteAdmin = async () => {
     if (!inviteEmail.trim()) return;
 
+    setErrorMessage("");
+    
     try {
       await inviteAdminMutation.mutateAsync({
         regionId,
@@ -36,6 +40,11 @@ export const InviteRegionAdminModal: React.FC<InviteRegionAdminModalProps> = ({
       handleClose();
     } catch (error) {
       console.error("Failed to invite admin:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to send invitation. Please try again."
+      );
     }
   };
 
@@ -43,8 +52,9 @@ export const InviteRegionAdminModal: React.FC<InviteRegionAdminModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       inviteAdminMutation.reset();
+      setErrorMessage("");
     }
-  }, [isOpen, inviteAdminMutation]);
+  }, [isOpen]);
 
   if (!isOpen || typeof document === "undefined") {
     return null;
@@ -94,10 +104,10 @@ export const InviteRegionAdminModal: React.FC<InviteRegionAdminModalProps> = ({
             </p>
           </div>
 
-          {inviteAdminMutation.error && (
+          {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800">
-                Failed to send invitation. Please try again.
+                {errorMessage}
               </p>
             </div>
           )}

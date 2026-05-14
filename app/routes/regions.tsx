@@ -357,13 +357,15 @@ export default function RegionsPage() {
                                   </Button>
                                 </Link>
                               )}
-                              <Button
-                                variant="outline"
-                                onClick={() => handleInviteAdmin(region.id, region.name)}
-                                size="sm"
-                              >
-                                <Mail size={16} className="mr-2" /> Invite Admin
-                              </Button>
+                              {(user?.role === "SUPER_ADMIN" || user?.role === "REGIONAL_ADMIN") && (
+                                <Button
+                                  variant="outline"
+                                  onClick={() => handleInviteAdmin(region.id, region.name)}
+                                  size="sm"
+                                >
+                                  <Mail size={16} className="mr-2" /> Invite Admin
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
