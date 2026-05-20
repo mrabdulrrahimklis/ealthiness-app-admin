@@ -20,4 +20,5 @@ export default [
   route("/settings", "routes/settings.tsx"),
   route("/unauthorized", "routes/unauthorized.tsx"),
   route("/admin-registration", "routes/admin-registration.tsx"),
+  route("/accept-invitation", "routes/accept-invitation.tsx"),
 ] satisfies RouteConfig;

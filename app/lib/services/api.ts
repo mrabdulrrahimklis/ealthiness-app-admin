@@ -6,6 +6,9 @@ const API_BASE_URL =
 export interface ApiError {
   message: string;
   status: number;
+  statusCode?: number;
+  errors?: string;
+  type?: string;
   code?: string;
 }
 
@@ -37,9 +40,13 @@ class ApiClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw {
-          message: errorData.message || `HTTP ${response.status}`,
+          message: errorData.message || errorData.errors || `HTTP ${response.status}`,
           status: response.status,
+          statusCode: errorData.statusCode || response.status,
+          errors: errorData.errors,
+          type: errorData.type,
           code: errorData.code,
+          ...errorData
         } as ApiError;
       }
 
