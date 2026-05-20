@@ -46,7 +46,7 @@ export default function AcceptInvitationPage() {
         );
       }
 
-      if (invitationType === "company") {
+      if (invitationType === "psychologist_company") {
         return apiClient.post(
           `/v1/therapy-sessions/companies/invite/accept?token=${token}`,
         );
@@ -82,7 +82,7 @@ export default function AcceptInvitationPage() {
     );
   }
 
-  if (invitationType !== "patient" && invitationType !== "company") {
+  if (invitationType !== "patient" && invitationType !== "psychologist_company") {
     return (
       <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center">
@@ -113,7 +113,7 @@ export default function AcceptInvitationPage() {
               Invitation Accepted Successfully!
             </h1>
             <p className="text-[#60646C] mb-6">
-              Your {invitationType} invitation has been accepted. You can now
+              Your {invitationType === "psychologist_company" ? "company" : invitationType} invitation has been accepted. You can now
               log in to the mobile app and continue your{" "}
               {invitationType === "patient"
                 ? "therapy sessions"
@@ -189,7 +189,7 @@ export default function AcceptInvitationPage() {
             </h1>
             <p className="text-[#60646C] mb-6">
               You have been invited to join the Ealthiness platform as a{" "}
-              {invitationType}. Accept this invitation to{" "}
+              {invitationType === "psychologist_company" ? "company" : invitationType}. Accept this invitation to{" "}
               {invitationType === "patient"
                 ? "start your therapy journey"
                 : "manage your company's wellness programs"}
